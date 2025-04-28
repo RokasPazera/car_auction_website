@@ -1,0 +1,84 @@
+###
+### Retrieve a token for authentication
+###
+POST {{protocol}}{{host}}:{{port}}/auth/user
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "rokas@gmail.com",
+  "password": "password123"
+}
+
+> {%
+    client.test("Token issued successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert('token' in response.body, "Token not present in response");
+        client.global.set("token", response.body.token);
+    });
+%}
+
+###
+### Fail to retrieve token with invalid credentials
+###
+POST {{protocol}}{{host}}:{{port}}/auth/user
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "invalidUser",
+  "password": "wrongPass"
+}
+
+> {%
+    client.test("Token not issued with invalid credentials", function () {
+        client.assert(response.status === 401, "Response status is not 401 for invalid credentials");
+        client.assert(!('token' in response.body), "Token should not be present in response");
+    });
+%}
+
+###
+### Access protected endpoint with invalid token
+###
+GET {{protocol}}{{host}}:{{port}}/cars/post
+
+> {%
+    client.test("Unauthorized request rejected", function () {
+        client.assert(response.status === 401, "Response status is not 401 for unauthorized request");
+    });
+%}
+
+
+###
+### Fail to use invalidated token
+###
+GET {{protocol}}{{host}}:{{port}}/cars/post
+Authorization: Bearer {{token}}
+
+> {%
+    client.test("Request failed with invalidated token", function () {
+        client.assert(response.status === 401, "Response status is not 401 for invalidated token");
+    });
+%}
+
+###
+### Create a new car (Admin Only)
+###
+POST {{protocol}}{{host}}:{{port}}/cars/
+Content-Type: application/json
+Authorization: Bearer {{token}}
+
+{
+  "model": "Tesla Model S",
+  "starting_price": 50000,
+  "year": 2022
+}
+
+> {%
+    client.test("Car created successfully by admin", function () {
+        client.assert(response.status === 201, "Response status is not 201");
+        client.assert(response.body.model === "Tesla Model S", "Model not created correctly");
+        client.assert(response.body.starting_price === 50000, "Starting price incorrect");
+        client.assert(response.body.year === 2022, "Year incorrect");
+    });
+%}

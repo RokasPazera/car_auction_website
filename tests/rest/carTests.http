@@ -1,0 +1,140 @@
+### Check if the list of cars is not empty
+GET {{protocol}}{{host}}:{{port}}/cars
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.length > 0, "Car list is empty");
+    });
+%}
+
+### Get the car by ID
+GET {{protocol}}{{host}}:{{port}}/cars/1
+
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === 1, "Car not found");
+    });
+%}
+
+### Check if the car has bids on it
+GET {{protocol}}{{host}}:{{port}}/cars/1/bids
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Check the winning bid of the car
+GET {{protocol}}{{host}}:{{port}}/cars/1/winning-bid
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+### Create a new car for auction
+POST {{protocol}}{{host}}:{{port}}/cars
+Content-Type: application/json
+
+{
+  "brand": "Toyota",
+  "model": "Corolla",
+  "year": 2022,
+  "price": 20000,
+  "url": "http://example.com/car.jpg"
+}
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert('id' in response.body.car, "Car ID not found in response");
+        client.assert(response.body.car.brand === "Toyota", "Brand is wrong");
+        client.assert(response.body.car.model === "Corolla", "Model is wrong");
+        client.assert(response.body.car.year === 2022, "Year is wrong");
+        client.assert(response.body.car.price === 20000, "Price is wrong");
+    });
+%}
+
+### Update an existing car
+PUT {{protocol}}{{host}}:{{port}}/cars/1
+Content-Type: application/json
+
+{
+  "price": 22000
+}
+
+> {%
+    client.test("Car updated successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.msg === "Car updated successfully", "Update message is incorrect");
+    });
+%}
+
+### Delete a car
+DELETE {{protocol}}{{host}}:{{port}}/cars/1
+
+> {%
+    client.test("Car deleted successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.msg === "Car deleted successfully", "Delete message is incorrect");
+    });
+%}
+
+
+### get the car by id
+GET {{protocol}}{{host}}:{{port}}/cars/1
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.id === 1, "Car not found");
+    });
+%}
+
+
+###check if the car has bids on it
+GET {{protocol}}{{host}}:{{port}}/cars/1/bids
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
+###check the winning bid of the car
+GET {{protocol}}{{host}}:{{port}}/cars/1/winning-bid
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+    });
+%}
+
+
+###create a new list for auction
+
+POST {{protocol}}{{host}}:{{port}}/cars
+Content-Type: application/json
+
+{
+  "model": 330,
+  "starting_price": 30,
+  "year": 2000
+}
+
+
+> {%
+    client.test("Request executed successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert('id' in response.body, "Response status is not 200");
+        client.assert(response.body.model === 330, "model is wrong");
+        client.assert(response.body.starting_price === 30, "starting price is wrong");
+        client.assert(response.body.year === 2000, "year is wrong");
+    });
+%}

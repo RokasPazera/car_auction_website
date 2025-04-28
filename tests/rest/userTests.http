@@ -1,0 +1,75 @@
+#the server has to be restarted after each test execution
+
+###
+### Register a new user
+###
+POST {{protocol}}{{host}}:{{port}}/auth/newUser
+Content-Type: application/json
+Accept: application/json
+
+{
+  "username": "user",
+  "email": "user@example.com",
+  "password": "pass"
+}
+
+> {%
+    client.test("User registered successfully", function () {
+        client.assert(response.status === 201, "Response status is not 201");
+    });
+%}
+
+###
+### Login a user
+###
+POST {{protocol}}{{host}}:{{port}}/auth/user
+Content-Type: application/json
+Accept: application/json
+
+{
+  "email": "rimas@gmail.com",
+  "password": "password123"
+}
+
+> {%
+    client.test("User logged in successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.global.set("token", response.body.token);
+    });
+%}
+
+###
+### Get user profile
+###
+GET {{protocol}}{{host}}:{{port}}/users/me/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+> {%
+    client.test("User profile retrieved successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.user.id === 1, "Incorrect user profile retrieved");
+    });
+%}
+
+###
+### Update user profile
+###
+PUT {{protocol}}{{host}}:{{port}}/users/me/1
+Content-Type: application/json
+Accept: application/json
+Authorization: Bearer {{token}}
+
+{
+  "email": "newUser@example.com",
+  "password": "newpass"
+}
+
+> {%
+    client.test("User profile updated successfully", function () {
+        client.assert(response.status === 200, "Response status is not 200");
+        client.assert(response.body.user.email === "newUser@example.com", "Email not updated correctly");
+    });
+%}
+
